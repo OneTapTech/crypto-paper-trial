@@ -1,0 +1,102 @@
+name: Crypto paper trial
+
+on:
+  push:
+    branches: [main]
+    paths: ['.github/workflows/paper-trial.yml']
+  schedule:
+    - cron: '7,22,37,52 * * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: crypto-paper-trial-state
+  cancel-in-progress: false
+
+jobs:
+  paper-trial:
+    if: github.ref == 'refs/heads/main' && github.event.repository.full_name == github.repository && github.event.repository.private == false
+    runs-on: ubuntu-latest
+    timeout-minutes: 9
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+
+      - name: Restore persistent paper state
+        run: |
+          logs="$RUNNER_TEMP/paper-logs"
+          echo "PAPER_LOGS=$logs" >> "$GITHUB_ENV"
+          echo "PAPER_DB=$logs/trial.sqlite3" >> "$GITHUB_ENV"
+
+          if git ls-remote --exit-code origin refs/heads/paper-logs; then
+            git fetch --depth=1 --no-tags origin refs/heads/paper-logs
+            git worktree add --detach "$logs" FETCH_HEAD
+            test -s "$logs/trial.sqlite3"
+          else
+            status=$?
+            test "$status" -eq 2
+            git worktree add --detach "$logs" HEAD
+            git -C "$logs" switch --orphan paper-logs
+          fi
+
+      - name: Run both simulated portfolios
+        run: python3 -u trader.py --once
+
+      - name: Save ledger and dashboard
+        run: |
+          python3 dashboard.py --export "$PAPER_LOGS/dashboard.html"
+          cat > "$PAPER_LOGS/README.md" <<'EOF'
+          # Crypto paper trial results
+
+          The SQLite ledger contains the complete simulation history, including scanner events,
+          signals, snapshots, and simulated fills. Each portfolio starts with $50.
+
+          Download [dashboard.html](dashboard.html) and open it in a browser to view
+          the latest saved snapshot. Download [trial.sqlite3](trial.sqlite3) for the full history.
+
+          New-token buys remain blocked until the strategy can verify contract risk and sellability.
+          EOF
+          git -C "$PAPER_LOGS" add trial.sqlite3 dashboard.html README.md
+          git -C "$PAPER_LOGS" -c user.name='github-actions[bot]' \
+            -c user.email='41898282+github-actions[bot]@users.noreply.github.com' \
+            commit -m "Record paper cycle $GITHUB_RUN_ID (attempt $GITHUB_RUN_ATTEMPT)"
+          git -C "$PAPER_LOGS" push origin HEAD:refs/heads/paper-logs
+
+      - name: Verify dashboard and report portfolio results
+        run: |
+          python3 dashboard.py &
+          dashboard_pid=$!
+          trap 'kill "$dashboard_pid"' EXIT
+          curl --fail --silent --show-error --retry 5 --retry-connrefused \
+            http://127.0.0.1:8080/api --output "$RUNNER_TEMP/paper-api.json"
+          curl --fail --silent --show-error http://127.0.0.1:8080/ \
+            --output "$RUNNER_TEMP/paper-dashboard.html"
+          python3 - <<'PY'
+          import json
+          import os
+          from pathlib import Path
+          import re
+
+          temp = Path(os.environ['RUNNER_TEMP'])
+          data = json.loads((temp / 'paper-api.json').read_text())
+          page = (temp / 'paper-dashboard.html').read_text()
+          exported = (Path(os.environ['PAPER_LOGS']) / 'dashboard.html').read_text()
+          embedded = re.search(r'<script id="trial-data" type="application/json">(.*?)</script>', exported)
+          assert 'Crypto Paper Trial' in page and embedded and json.loads(embedded[1]) == data
+          assert {p['strategy']: p['initial'] for p in data['portfolios']} == {'established': 50, 'new': 50}
+          print('PASS: live dashboard and saved dashboard agree with the ledger')
+
+          with open(os.environ['GITHUB_STEP_SUMMARY'], 'a') as summary:
+              print('## Simulated portfolio results\n', file=summary)
+              print('| Strategy | Starting cash | Last equity | Last snapshot (UTC) |', file=summary)
+              print('| --- | ---: | ---: | --- |', file=summary)
+              for portfolio in data['portfolios']:
+                  strategy = portfolio['strategy']
+                  snapshot = next((s for s in reversed(data['snapshots']) if s['strategy'] == strategy), None)
+                  equity = f"${snapshot['equity']:.2f}" if snapshot else 'Unavailable'
+                  timestamp = snapshot['ts'] if snapshot else 'Unavailable'
+                  print(f"| {strategy} | ${portfolio['initial']:.2f} | {equity} | {timestamp} |", file=summary)
+              print('\nThe paper-logs branch contains the full ledger and downloadable dashboard.', file=summary)
+          PY
+          python3 healthcheck.py
