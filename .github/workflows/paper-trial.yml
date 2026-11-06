@@ -20,6 +20,8 @@ jobs:
     if: github.ref == 'refs/heads/main' && github.event.repository.full_name == github.repository && github.event.repository.private == false
     runs-on: ubuntu-latest
     timeout-minutes: 9
+    outputs:
+      stop: ${{ steps.review.outputs.stop }}
     steps:
       - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
 
@@ -40,10 +42,75 @@ jobs:
             git -C "$logs" switch --orphan paper-logs
           fi
 
+      - name: Review the Friday cutoff
+        id: review
+        run: |
+          python3 - <<'PY'
+          import datetime as dt
+          import json
+          import math
+          import os
+          import sqlite3
+          from pathlib import Path
+
+          # Midnight in Kansas City after Friday, November 13, 2026.
+          cutoff = dt.datetime(2026, 11, 14, 6, tzinfo=dt.timezone.utc)
+          if dt.datetime.now(dt.timezone.utc) < cutoff:
+              raise SystemExit(0)
+
+          report = Path(os.environ['PAPER_LOGS']) / 'trial-review.json'
+          if report.exists():
+              review = json.loads(report.read_text())
+          else:
+              db_path = Path(os.environ['PAPER_DB'])
+              snapshots = {}
+              if db_path.exists():
+                  with sqlite3.connect(db_path.resolve().as_uri() + '?mode=ro', uri=True) as db:
+                      for strategy in ('established', 'new'):
+                          row = db.execute(
+                              'SELECT ts, equity FROM snapshots WHERE strategy=? AND ts<? ORDER BY ts DESC LIMIT 1',
+                              (strategy, cutoff.isoformat()),
+                          ).fetchone()
+                          if row:
+                              snapshots[strategy] = dict(timestamp=row[0], equity=row[1])
+
+              complete = len(snapshots) == 2 and all(
+                  s['equity'] is not None and math.isfinite(s['equity']) and
+                  cutoff - dt.datetime.fromisoformat(s['timestamp']) <= dt.timedelta(hours=1)
+                  for s in snapshots.values()
+              )
+              equity = math.fsum(s['equity'] for s in snapshots.values()) if complete else None
+              reason = 'insufficient_data' if not complete else (
+                  'threshold_met' if equity >= 300 else 'below_threshold'
+              )
+              review = dict(cutoff_utc=cutoff.isoformat(), starting_equity=100,
+                            target_equity=300, ending_equity=equity,
+                            return_percent=equity - 100 if complete else None,
+                            result=reason, stop=reason != 'threshold_met',
+                            portfolios=snapshots)
+              report.write_text(json.dumps(review, indent=2) + '\n')
+
+          print(json.dumps(review, indent=2))
+          with open(os.environ['GITHUB_OUTPUT'], 'a') as output:
+              print(f"stop={str(review['stop']).lower()}", file=output)
+          PY
+          if [ ! -f "$PAPER_LOGS/trial-review.json" ]; then
+            exit 0
+          fi
+          git -C "$PAPER_LOGS" add trial-review.json
+          if ! git -C "$PAPER_LOGS" diff --cached --quiet; then
+            git -C "$PAPER_LOGS" -c user.name='github-actions[bot]' \
+              -c user.email='41898282+github-actions[bot]@users.noreply.github.com' \
+              commit -m 'Record the paper trial cutoff decision'
+            git -C "$PAPER_LOGS" push origin HEAD:refs/heads/paper-logs
+          fi
+
       - name: Run both simulated portfolios
+        if: steps.review.outputs.stop != 'true'
         run: python3 -u trader.py --once
 
       - name: Save ledger and dashboard
+        if: steps.review.outputs.stop != 'true'
         run: |
           python3 dashboard.py --export "$PAPER_LOGS/dashboard.html"
           cat > "$PAPER_LOGS/README.md" <<'EOF'
@@ -64,6 +131,7 @@ jobs:
           git -C "$PAPER_LOGS" push origin HEAD:refs/heads/paper-logs
 
       - name: Verify dashboard and report portfolio results
+        if: steps.review.outputs.stop != 'true'
         run: |
           python3 dashboard.py &
           dashboard_pid=$!
@@ -100,3 +168,20 @@ jobs:
               print('\nThe paper-logs branch contains the full ledger and downloadable dashboard.', file=summary)
           PY
           python3 healthcheck.py
+
+  stop-paper-trial:
+    needs: paper-trial
+    if: needs.paper-trial.outputs.stop == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 2
+    permissions:
+      actions: write
+    env:
+      GH_TOKEN: ${{ github.token }}
+    steps:
+      - name: Disable the paper-trading workflow
+        run: |
+          endpoint="repos/$GITHUB_REPOSITORY/actions/workflows/paper-trial.yml"
+          gh api --method PUT "$endpoint/disable"
+          test "$(gh api "$endpoint" --jq '.state')" = disabled_manually
+          echo 'Paper-trading workflow disabled. Ledger and dashboard retained.' >> "$GITHUB_STEP_SUMMARY"
