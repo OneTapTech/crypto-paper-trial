@@ -1,0 +1,76 @@
+name: Quant research desk (paper only)
+
+on:
+  push:
+    branches: [main]
+    paths: ['quant_desk/**', '.github/workflows/quant-desk.yml']
+  schedule:
+    - cron: '19 */4 * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: quant-desk-state
+  cancel-in-progress: false
+
+jobs:
+  research:
+    if: github.ref == 'refs/heads/main' && github.event.repository.private == false
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+      - name: Verify governance and replay safeguards
+        run: python3 -m unittest discover -s quant_desk -v
+      - name: Restore separate research state
+        run: |
+          state="$RUNNER_TEMP/quant-state"
+          echo "QUANT_STATE=$state" >> "$GITHUB_ENV"
+          if git ls-remote --exit-code origin refs/heads/quant-state; then
+            git fetch --depth=1 --no-tags origin refs/heads/quant-state
+            git worktree add --detach "$state" FETCH_HEAD
+            test -s "$state/desk.sqlite3"
+            test -s "$state/state-marker.json"
+            python3 -c "import sqlite3,sys; c=sqlite3.connect(sys.argv[1]); assert c.execute('pragma integrity_check').fetchone()[0]=='ok'" "$state/desk.sqlite3"
+          else
+            status=$?
+            test "$status" -eq 2
+            git worktree add --detach "$state" HEAD
+            git -C "$state" switch --orphan quant-state
+            mkdir -p "$state"
+          fi
+      - name: Run paper research cycle
+        run: python3 -u -m quant_desk.runner --state "$QUANT_STATE"
+      - name: Persist separate registry and research evidence
+        if: always() && env.QUANT_STATE != ''
+        run: |
+          test -s "$QUANT_STATE/desk.sqlite3"
+          test -s "$QUANT_STATE/state-marker.json"
+          git -C "$QUANT_STATE" add desk.sqlite3 state-marker.json code-manifest.json registry.json registry.md history.json graveyard.json brief.json brief.md spec-*.json
+          if [ -d "$QUANT_STATE/raw" ]; then git -C "$QUANT_STATE" add raw; fi
+          if [ -d "$QUANT_STATE/experiments" ]; then git -C "$QUANT_STATE" add experiments; fi
+          if ! git -C "$QUANT_STATE" diff --cached --quiet; then
+            git -C "$QUANT_STATE" -c user.name='github-actions[bot]' -c user.email='41898282+github-actions[bot]@users.noreply.github.com' commit -m "Record paper quant research $GITHUB_RUN_ID"
+            git -C "$QUANT_STATE" push origin HEAD:refs/heads/quant-state
+          fi
+          cat "$QUANT_STATE/brief.md" >> "$GITHUB_STEP_SUMMARY"
+      - name: Verify research-only invariants
+        run: |
+          python3 - "$QUANT_STATE" <<'PY'
+          import json,sqlite3,sys
+          from pathlib import Path
+          state=Path(sys.argv[1])
+          brief=json.loads((state/'brief.json').read_text())
+          db=sqlite3.connect(state/'desk.sqlite3')
+          assert db.execute('PRAGMA integrity_check').fetchone()[0]=='ok'
+          assert db.execute('SELECT count(*) FROM strategies').fetchone()[0]==3
+          assert db.execute('SELECT count(*) FROM paper_fills').fetchone()[0]==0
+          assert not brief['live']['connected']
+          assert brief['paper']['equity_usd']==10000
+          assert brief['unseen_validation_tests']==0
+          assert len(brief['market_regimes'])==3, 'Not all markets received usable data'
+          assert not any('/research blocked:' in gap for gap in brief['data_gaps']), 'Research/data replay blocked; see preserved brief'
+          print('PASS: separate ledger, no trades, three-market research recorded')
+          PY
