@@ -1,0 +1,43 @@
+{
+  "id": "REPLACE_WITH_REGISTERED_ID",
+  "version": 1,
+  "family": "REPLACE_WITH_CAUSAL_FAMILY",
+  "market": "BTC",
+  "reference_symbol": "PF_XBTUSD",
+  "execution_venue": null,
+  "timeframe": "4h",
+  "mode": "paper",
+  "hypothesis": "REPLACE_WITH_FALSIFIABLE_HYPOTHESIS",
+  "mechanism": "REPLACE_WITH_CAUSAL_MECHANISM",
+  "entry": {
+    "decision_at": "completed bar t plus verified feature publication lag",
+    "condition": "REPLACE_WITH_EXACT_BOOLEAN_RULES",
+    "order_type": "marketable_limit",
+    "earliest_fill": "first executable quote after decision and modeled latency"
+  },
+  "exit": {"take_profit": "REPLACE_WITH_EXACT_RULE", "time_stop": "REPLACE_WITH_EXACT_RULE", "intrabar_conflict": "stop_first"},
+  "stop": {"type": "reduce_only_protective", "price": "REPLACE_WITH_EXACT_FORMULA", "gap_fill": "first_executable_adverse_quote"},
+  "size": {
+    "risk_per_trade_equity_fraction_max": 0.005,
+    "quantity_rule": "floor_to_contract_step(min(risk_including_costs/stop_cost_distance,notional_capacity,margin_capacity))",
+    "strategy_share_of_deployed_risk_max": 0.25,
+    "total_open_risk_fraction_exclusive": 0.03,
+    "gross_leverage_max": 3,
+    "live_small_fraction": 0.2
+  },
+  "max_slippage": {"bps": 10, "exceed_action": "reject_entry"},
+  "filters": {
+    "fresh_book_seconds_max": 60,
+    "fresh_mark_seconds_max": 120,
+    "spread_bps_max": 10,
+    "visible_depth_order_multiple_min": 10,
+    "macro_blackout_minutes_before_after": 60,
+    "required_features": ["closed_ohlcv", "funding", "depth", "verified_macro_calendar"],
+    "missing_required_data_action": "block"
+  },
+  "regime_switch": {"on": "REPLACE_WITH_EXACT_ASOF_CLASSIFIER", "off_action": "block_new_entries_and_follow_frozen_exit"},
+  "expiry_date": null,
+  "approval_envelope_required": true,
+  "template_only": true,
+  "executable": false
+}
