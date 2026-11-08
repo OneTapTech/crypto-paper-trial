@@ -1,0 +1,74 @@
+{
+  "id": "TREND24-SOL",
+  "version": 1,
+  "family": "volume-confirmed-channel-breakout-v1",
+  "market": "SOL",
+  "reference_symbol": "PF_SOLUSD",
+  "timeframe": "4h",
+  "created_at": "2026-11-08T08:41:03.775269+00:00",
+  "expiry_date": "2026-12-08T08:41:03.775269+00:00",
+  "mode": "paper-research",
+  "hypothesis": "A 24-bar channel breakout with above-median volume and aligned 50-bar trend has positive net expectancy over at most 24 bars.",
+  "mechanism": "Persistent directional order flow following a volatility/channel expansion; falsified by nonpositive net expectancy after conservative costs.",
+  "parameters": {
+    "lookback": 24,
+    "atr_period": 14,
+    "trend_period": 50,
+    "stop_atr": 2.0,
+    "max_hold": 24,
+    "volume_multiplier": 1.25
+  },
+  "entry": {
+    "decision": "after candle t closes",
+    "fill": "next candle open plus adverse slippage",
+    "long": "close[t] > max(high[t-24:t]) AND close[t] > mean(close[t-49:t+1]) AND volume[t] >= 1.25 * median(volume[t-24:t])",
+    "short": "close[t] < min(low[t-24:t]) AND close[t] < mean(close[t-49:t+1]) AND volume[t] >= 1.25 * median(volume[t-24:t])",
+    "one_position_per_strategy": true
+  },
+  "exit": {
+    "take_profit": "2R from actual entry fill",
+    "timeout": "24 completed bars after entry",
+    "intrabar_priority": "stop first",
+    "force_close_at_dataset_end": true
+  },
+  "stop": {
+    "type": "fixed",
+    "distance": "2 * mean(true_range[t-13:t+1]) at signal",
+    "gap": "worse of stop price and bar open, plus adverse slippage"
+  },
+  "size": {
+    "max_equity_risk_fraction": 0.005,
+    "include_round_trip_costs": true,
+    "max_strategy_risk_fraction_of_total_budget": 0.25,
+    "max_gross_portfolio_leverage": 3,
+    "live_small_fraction": 0.2
+  },
+  "max_slippage": {
+    "bps_per_side": 10,
+    "action_if_exceeded": "reject entry"
+  },
+  "filters": {
+    "fresh_book_seconds": 60,
+    "fresh_mark_seconds": 120,
+    "spread_bps_max": 10,
+    "depth_multiple_of_order_min": 10,
+    "macro_event_blackout_minutes_before_after": 60,
+    "missing_required_data": "reject entry",
+    "required": [
+      "closed_ohlcv",
+      "funding_history",
+      "current_book",
+      "verified_macro_calendar"
+    ]
+  },
+  "regime_switch": {
+    "on": "50-bar SMA aligned with breakout direction and ATR/close in [0.002,0.10]",
+    "off": "missing data, extreme volatility, flat trend, macro blackout or risk stop"
+  },
+  "implementation": "quant_desk/research.py:replay",
+  "pilot_limitations": [
+    "Development replay does not implement book or macro filters without point-in-time historical data.",
+    "No live executor; no VALIDATED or PAPER promotion in this pilot."
+  ],
+  "immutable": true
+}

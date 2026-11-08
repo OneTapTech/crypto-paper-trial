@@ -1,0 +1,24 @@
+[
+  {
+    "id": 1,
+    "strategy_id": "TREND24-ETH",
+    "version": 1,
+    "family": "volume-confirmed-channel-breakout-v1",
+    "fingerprint": "41d50a78345e301f4ea47c815df06316f5c5f0319a1ec97b51fb6b5e89584801",
+    "hypothesis": "A 24-bar channel breakout with above-median volume and aligned 50-bar trend has positive net expectancy over at most 24 bars.",
+    "retired_at": "2026-11-08T08:41:05.076894+00:00",
+    "cause": "Development falsification: nonpositive net expectancy / PF <= 1 after modeled costs",
+    "results_json": "{\"artifact_path\":\"experiments/b9d0ac17f67c132f90b3871393c4de60f3d767174c0f6bbf704b5b2a958f2871.json\",\"closed_trades\":17,\"code_sha256\":\"bd6df59f09c724516d15dc395776d2fd9e72d43a89ba0924acb7a8f6104328f9\",\"conservative_funding_debit_usd\":10.575771440976023,\"coverage_exclusion\":{\"excluded_bars\":56,\"first_missing_hour_utc\":\"2026-10-30T03:00:00+00:00\",\"policy\":\"stop whole replay before first incomplete funding bar; no rate imputation\"},\"fees_usd\":32.63900256204183,\"first_bar_utc\":\"2026-07-31T12:00:00+00:00\",\"ignored_signals\":0,\"label\":\"BACKTEST-DEVELOPMENT\",\"last_bar_end_utc\":\"2026-10-30T00:00:00+00:00\",\"limitations\":[\"not unseen; no original publication/latency archive\",\"historical order book, macro blackout and market impact not modeled\",\"funding credits omitted; full-bar funding charged on intrabar exits\",\"funding reserve uses only the preceding 24 known hourly rates\",\"standalone diagnostic, not a risk-governed combined portfolio\"],\"max_drawdown_pct\":3.3120356315440302,\"net_pnl_usd\":-174.23213235234726,\"net_return_pct\":-1.7423213235234727,\"parameters\":{\"atr_period\":14,\"lookback\":24,\"max_hold\":24,\"stop_atr\":2.0,\"trend_period\":50,\"volume_multiplier\":1.25},\"profit_factor\":0.6881509669916742,\"profit_factor_note\":\"null if no losing trades; not an automatic pass\",\"trade_sha256\":\"7a589fb18029267ef2368b256a937303cf16d05805ae26b10e8a5206db97c153\",\"unseen_trades\":0,\"variant\":\"base\"}"
+  },
+  {
+    "id": 2,
+    "strategy_id": "TREND24-SOL",
+    "version": 1,
+    "family": "volume-confirmed-channel-breakout-v1",
+    "fingerprint": "41d50a78345e301f4ea47c815df06316f5c5f0319a1ec97b51fb6b5e89584801",
+    "hypothesis": "A 24-bar channel breakout with above-median volume and aligned 50-bar trend has positive net expectancy over at most 24 bars.",
+    "retired_at": "2026-11-08T08:41:05.077064+00:00",
+    "cause": "Development falsification: nonpositive net expectancy / PF <= 1 after modeled costs",
+    "results_json": "{\"artifact_path\":\"experiments/5b2ba29925050fa0286469399789b5a586f1b619f4d9dde5ee9f67cc918b835f.json\",\"closed_trades\":18,\"code_sha256\":\"bd6df59f09c724516d15dc395776d2fd9e72d43a89ba0924acb7a8f6104328f9\",\"conservative_funding_debit_usd\":18.39233005205405,\"coverage_exclusion\":{\"excluded_bars\":56,\"first_missing_hour_utc\":\"2026-10-30T03:00:00+00:00\",\"policy\":\"stop whole replay before first incomplete funding bar; no rate imputation\"},\"fees_usd\":28.2262875863683,\"first_bar_utc\":\"2026-07-31T12:00:00+00:00\",\"ignored_signals\":0,\"label\":\"BACKTEST-DEVELOPMENT\",\"last_bar_end_utc\":\"2026-10-30T00:00:00+00:00\",\"limitations\":[\"not unseen; no original publication/latency archive\",\"historical order book, macro blackout and market impact not modeled\",\"funding credits omitted; full-bar funding charged on intrabar exits\",\"funding reserve uses only the preceding 24 known hourly rates\",\"standalone diagnostic, not a risk-governed combined portfolio\"],\"max_drawdown_pct\":2.6314565243994115,\"net_pnl_usd\":-45.660296616947235,\"net_return_pct\":-0.4566029661694724,\"parameters\":{\"atr_period\":14,\"lookback\":24,\"max_hold\":24,\"stop_atr\":2.0,\"trend_period\":50,\"volume_multiplier\":1.25},\"profit_factor\":0.8966740343807311,\"profit_factor_note\":\"null if no losing trades; not an automatic pass\",\"trade_sha256\":\"d03d3350e1534cb80ebcdaecb4db357329d7745f3d42216132c6a6a9d819d806\",\"unseen_trades\":0,\"variant\":\"base\"}"
+  }
+]

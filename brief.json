@@ -1,0 +1,111 @@
+{
+  "cycle_id": "20261108T084103-2385",
+  "generated_at_utc": "2026-11-08T08:41:05.078788+00:00",
+  "generated_at_chicago": "2026-11-08T02:41:05.078788-06:00",
+  "mode": "PAPER RESEARCH; no eligible strategies or positions",
+  "market_regimes": {
+    "BTC": {
+      "mark": 75825.08752444675,
+      "mark_observed_at": "2026-11-08T08:41:04.376609+00:00",
+      "ticker_last_trade_time": "2026-11-08T08:41:00.859002077Z",
+      "price_change_24h_pct": -0.26,
+      "relative_funding_hourly": 1.83268375e-05,
+      "open_interest_base_units": 2657.8568,
+      "spread_bps": 0.13188523346983455,
+      "bid_depth_10bps_usd": 15812289.1308,
+      "ask_depth_10bps_usd": 12375262.6861,
+      "regime": "downtrend",
+      "regime_method": "last completed 4h close vs 50-bar SMA +/-0.5%",
+      "last_candle_end": "2026-11-08T08:00:00+00:00",
+      "completed_candles": 599,
+      "observed_asof": "2026-11-08T08:41:03+00:00"
+    },
+    "ETH": {
+      "mark": 2234.99799251992,
+      "mark_observed_at": "2026-11-08T08:41:04.546154+00:00",
+      "ticker_last_trade_time": "2026-11-08T08:40:56.451537263Z",
+      "price_change_24h_pct": -0.48,
+      "relative_funding_hourly": 7.852179166667e-06,
+      "open_interest_base_units": 30447.959,
+      "spread_bps": 0.4474172837292635,
+      "bid_depth_10bps_usd": 4629283.9956,
+      "ask_depth_10bps_usd": 5163606.1471,
+      "regime": "downtrend",
+      "regime_method": "last completed 4h close vs 50-bar SMA +/-0.5%",
+      "last_candle_end": "2026-11-08T08:00:00+00:00",
+      "completed_candles": 599,
+      "observed_asof": "2026-11-08T08:41:03+00:00"
+    },
+    "SOL": {
+      "mark": 89.13307594588,
+      "mark_observed_at": "2026-11-08T08:41:04.812221+00:00",
+      "ticker_last_trade_time": "2026-11-08T08:40:56.200724983Z",
+      "price_change_24h_pct": -1.2,
+      "relative_funding_hourly": 1.4275858333333e-05,
+      "open_interest_base_units": 214632.66,
+      "spread_bps": 1.1218937566618183,
+      "bid_depth_10bps_usd": 1906786.1781000001,
+      "ask_depth_10bps_usd": 1835547.2325,
+      "regime": "downtrend",
+      "regime_method": "last completed 4h close vs 50-bar SMA +/-0.5%",
+      "last_candle_end": "2026-11-08T08:00:00+00:00",
+      "completed_candles": 599,
+      "observed_asof": "2026-11-08T08:41:03+00:00"
+    }
+  },
+  "data_gaps": [
+    "on-chain-flows: No timestamped, entity-labeled multi-chain flow provider connected",
+    "macro-calendar: No parsed, verified release-time calendar connected; official links in handbook only",
+    "historical-orderbook: Current snapshots only; no point-in-time depth archive",
+    "publication-time: Historical data downloaded now cannot certify original availability or revisions",
+    "BTC/development coverage: {\"excluded_bars\":56,\"first_missing_hour_utc\":\"2026-10-30T03:00:00+00:00\",\"policy\":\"stop whole replay before first incomplete funding bar; no rate imputation\"}",
+    "ETH/development coverage: {\"excluded_bars\":56,\"first_missing_hour_utc\":\"2026-10-30T03:00:00+00:00\",\"policy\":\"stop whole replay before first incomplete funding bar; no rate imputation\"}",
+    "SOL/development coverage: {\"excluded_bars\":56,\"first_missing_hour_utc\":\"2026-10-30T03:00:00+00:00\",\"policy\":\"stop whole replay before first incomplete funding bar; no rate imputation\"}"
+  ],
+  "registry_count": 3,
+  "tests_run_this_cycle": 39,
+  "lifetime_development_tests": 39,
+  "unseen_validation_tests": 0,
+  "strategies": [
+    {
+      "id": "TREND24-BTC",
+      "version": 1,
+      "status": "SPEC",
+      "reason": "Waiting: development sample <20 closed trades or PF undefined; no validation attempted"
+    },
+    {
+      "id": "TREND24-ETH",
+      "version": 1,
+      "status": "RETIRED",
+      "reason": "Development falsification: nonpositive net expectancy / PF <= 1 after modeled costs"
+    },
+    {
+      "id": "TREND24-SOL",
+      "version": 1,
+      "status": "RETIRED",
+      "reason": "Development falsification: nonpositive net expectancy / PF <= 1 after modeled costs"
+    }
+  ],
+  "paper": {
+    "initial_equity_usd": 10000,
+    "equity_usd": 10000,
+    "pnl_usd": 0,
+    "fills": 0,
+    "open_risk_usd": 0,
+    "gross_leverage": 0
+  },
+  "live": {
+    "connected": false,
+    "pnl_usd": null
+  },
+  "decisions_needed": [
+    "Confirm $10,000 simulated capital and execution venue/account eligibility before any exchange integration.",
+    "Identify Grok Bot product/API if Grok integration is desired; current runtime is deterministic Python on GitHub Actions."
+  ],
+  "next_action": "Archive point-in-time inputs and build independent validation; never bypass the 300-trade or 21-day paper gates.",
+  "operational_limitations": [
+    "Promotion and execution intentionally locked in this pilot.",
+    "No on-chain flow provider or verified macro-calendar parser.",
+    "Scheduled jobs are periodic and may be delayed, not an always-on execution server."
+  ]
+}
