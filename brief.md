@@ -1,14 +1,14 @@
 # Quant desk daily brief
 
-Generated: 2026-11-08T02:41:05.078788-06:00 (America/Chicago)
+Generated: 2026-11-08T11:59:00.378323-06:00 (America/Chicago)
 
 **PAPER RESEARCH. Live execution disconnected.**
 
 | Market | Mark USD | Regime | Spread bps | Completed 4h bars |
 |---|---:|---|---:|---:|
-| BTC | 75,825.09 | downtrend | 0.13 | 599 |
-| ETH | 2,235.00 | downtrend | 0.45 | 599 |
-| SOL | 89.13 | downtrend | 1.12 | 599 |
+| BTC | 75,688.17 | downtrend | 0.13 | 599 |
+| ETH | 2,227.99 | downtrend | 0.45 | 599 |
+| SOL | 89.08 | downtrend | 2.24 | 599 |
 
 | Strategy | Version | Status | Reason |
 |---|---:|---|---|
@@ -16,7 +16,7 @@ Generated: 2026-11-08T02:41:05.078788-06:00 (America/Chicago)
 | TREND24-ETH | 1 | RETIRED | Development falsification: nonpositive net expectancy / PF <= 1 after modeled costs |
 | TREND24-SOL | 1 | RETIRED | Development falsification: nonpositive net expectancy / PF <= 1 after modeled costs |
 
-Development tests this cycle: 39. Total unique tests: 39. Unseen validation tests: 0.
+Development tests this cycle: 0. Total unique tests: 39. Unseen validation tests: 0.
 
 | Strategy | BACKTEST development net P&L | Net PF | Closed trades | PAPER P&L | LIVE P&L |
 |---|---:|---:|---:|---:|---|
@@ -36,9 +36,6 @@ No strategy has earned VALIDATED or PAPER status. No 21-day strategy paper clock
 - macro-calendar: No parsed, verified release-time calendar connected; official links in handbook only
 - historical-orderbook: Current snapshots only; no point-in-time depth archive
 - publication-time: Historical data downloaded now cannot certify original availability or revisions
-- BTC/development coverage: {"excluded_bars":56,"first_missing_hour_utc":"2026-10-30T03:00:00+00:00","policy":"stop whole replay before first incomplete funding bar; no rate imputation"}
-- ETH/development coverage: {"excluded_bars":56,"first_missing_hour_utc":"2026-10-30T03:00:00+00:00","policy":"stop whole replay before first incomplete funding bar; no rate imputation"}
-- SOL/development coverage: {"excluded_bars":56,"first_missing_hour_utc":"2026-10-30T03:00:00+00:00","policy":"stop whole replay before first incomplete funding bar; no rate imputation"}
 
 ## Decisions / next actions
 
