@@ -1,14 +1,14 @@
 # Quant desk daily brief
 
-Generated: 2026-11-08T17:48:42.370711-06:00 (America/Chicago)
+Generated: 2026-11-09T00:52:37.785055-06:00 (America/Chicago)
 
 **PAPER RESEARCH. Live execution disconnected.**
 
 | Market | Mark USD | Regime | Spread bps | Completed 4h bars |
 |---|---:|---|---:|---:|
-| BTC | 74,830.10 | downtrend | 0.13 | 599 |
-| ETH | 2,129.82 | downtrend | 0.47 | 599 |
-| SOL | 86.68 | downtrend | 2.31 | 599 |
+| BTC | 74,280.84 | downtrend | 0.13 | 599 |
+| ETH | 2,113.39 | downtrend | 0.47 | 599 |
+| SOL | 86.26 | downtrend | 3.48 | 599 |
 
 | Strategy | Version | Status | Reason |
 |---|---:|---|---|
