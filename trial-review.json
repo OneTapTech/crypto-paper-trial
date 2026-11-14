@@ -1,0 +1,19 @@
+{
+  "cutoff_utc": "2026-11-14T06:00:00+00:00",
+  "starting_equity": 100,
+  "target_equity": 300,
+  "ending_equity": null,
+  "return_percent": null,
+  "result": "insufficient_data",
+  "stop": true,
+  "portfolios": {
+    "established": {
+      "timestamp": "2026-11-14T01:40:09.500294+00:00",
+      "equity": 48.67901921069276
+    },
+    "new": {
+      "timestamp": "2026-11-14T01:40:10.347451+00:00",
+      "equity": 50.0
+    }
+  }
+}
